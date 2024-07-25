@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung-style Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000000;
+            color: white;
+        }
+        .calculator {
+            width: 300px;
+            background-color: #000000;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 20px;
+        }
+        .display-container {
+            position: relative;
+            height: 60px;
+            margin-bottom: 20px;
+            background-color: #222222;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .display {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            font-size: 40px;
+            /* height:80px; */
+            text-align: right;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        button {
+            border: none;
+            background-color: #333333;
+            color: white;
+            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #444444;
+        }
+        .operator {
+            color: #33cc66;
+        }
+        .function {
+            color: #ff9933;
+        }
+        .equals {
+            background-color: #33cc66;
+            color: #000000;
+        }
+        .equals:hover {
+            background-color: #40e070;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display-container">
+            <div class="display">0</div>
+        </div>
+        <div class="buttons">
+            <button class="function">C</button>
+            <button class="function">()</button>
+            <button class="function">%</button>
+            <button class="operator">÷</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">×</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">-</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">+</button>
+            <button class="function">+/-</button>
+            <button>0</button>
+            <button>.</button>
+            <button class="equals">=</button>
+        </div>
+    </div>
+    <script>
+        const display = document.querySelector('.display');
+        const buttons = document.querySelectorAll('button');
+        let currentInput = '';
+        let previousInput = '';
+        let operation = null;
+        let shouldResetDisplay = false;
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.textContent;
+                if (value === 'C') {
+                    clear();
+                } else if (value === '=') {
+                    compute();
+                } else if (value === '%') {
+                    percentage();
+                } else if (value === '()') {
+                    toggleParenthesis();
+                } else if (value === '+/-') {
+                    toggleSign();
+                } else if (['+', '-', '×', '÷'].includes(value)) {
+                    handleOperator(value);
+                } else {
+                    appendNumber(value);
+                }
+                updateDisplay();
+            });
+        });
+
+        function appendNumber(number) {
+            if (shouldResetDisplay) {
+                currentInput = number;
+                shouldResetDisplay = false;
+            } else {
+                currentInput += number;
+            }
+        }
+
+        function handleOperator(op) {
+            if (operation !== null) compute();
+            previousInput = currentInput;
+            operation = op;
+            currentInput += ` ${op} `;
+            shouldResetDisplay = true;
+        }
+
+        function compute() {
+            if (operation === null || shouldResetDisplay) return;
+            let computation;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput.split(' ').pop());
+            if (isNaN(prev) || isNaN(current)) return;
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '×':
+                    computation = prev * current;
+                    break;
+                case '÷':
+                    computation = prev / current;
+                    break;
+                default:
+                    return;
+            }
+            currentInput = computation.toString();
+            operation = null;
+        }
+
+        function clear() {
+            currentInput = '';
+            previousInput = '';
+            operation = null;
+        }
+
+        function percentage() {
+            currentInput = (parseFloat(currentInput) / 100).toString();
+        }
+
+        function toggleParenthesis() {
+            if (currentInput.endsWith('(')) {
+                currentInput += ')';
+            } else {
+                currentInput += '(';
+            }
+        }
+
+        function toggleSign() {
+            if (currentInput !== '' && currentInput !== '0') {
+                currentInput = (parseFloat(currentInput) * -1).toString();
+            }
+        }
+
+        function updateDisplay() {
+            display.textContent = currentInput || '0';
+        }
+    </script>
+</body>
+</html>
